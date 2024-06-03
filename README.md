@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="ieltspeakeasy_logo.png" alt="IELTSPEAKEASY Logo" width="200"/>
+  <img src="https://github.com/Patelharsh007/IELTSPEAKEASY/blob/b1ed62d6c19277db3523b72e1eb1f36afc541cc9/logo.jpeg" alt="IELTSPEAKEASY Logo" width="200"/>
 </div>
 
 # IELTSPEAKEASY 🚀
