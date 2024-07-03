@@ -1,0 +1,172 @@
+{% extends "user_dash.html" %}
+{% block title %}IELTS Exam{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center ">
+    <div class="text-center">
+        <h1>Basic Questions</h1>
+        <p id="instructions">Instructions will be spoken shortly. Please wait...</p>
+        <button id="startButton" class="btn btn-primary mt-3" onclick="startExam()">Start Basic Questions</button>
+
+        <div id="basic-question-section" style="display:none;">
+            <h2 id="question" class="mt-4"></h2>
+            <textarea id="response" class="form-control mt-2" rows="3" readonly></textarea>
+            <button id="startRecordingButton" class="btn btn-success mt-3" onclick="startRecording()">Start Recording</button>
+            <button id="stopRecordingButton" class="btn btn-warning mt-3" onclick="stopRecording()" style="display:none;">Stop Recording</button>
+            <button id="nextButton" class="btn btn-secondary mt-3" onclick="nextQuestion()">Next Question</button>
+            <button id="finishButton" class="btn btn-danger mt-3" onclick="finishBasicQuestions()" style="display:none;">Finish Basic Questions</button>
+            <div id="completionMessage" style="display:none;" class="mt-4">
+                <p>You have completed the Basic Questions. Please proceed to the next section.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let recognition;
+    let currentQuestionIndex = 0;
+    let sessionId = null;
+    const questions = {{ basic_questions|tojson }};
+    const responses = {};
+
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (window.SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                }
+            }
+            document.getElementById('response').value += finalTranscript.trim();
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error: ', event.error);
+            alert('Speech recognition error. Please try again.');
+        };
+    } else {
+        alert("Your browser does not support speech recognition. Please use a supported browser.");
+    }
+
+    function generateSessionId() {
+        return 'session-' + Date.now();
+    }
+
+    function playInstructions() {
+        const instruction = new SpeechSynthesisUtterance('This is the basic questions section. Please answer each question clearly after it is spoken. Click the Start Recording button to respond.');
+
+        instruction.onend = () => {
+            document.getElementById('startButton').disabled = false;
+        };
+
+        window.speechSynthesis.speak(instruction);
+    }
+
+    function startExam() {
+        sessionId = generateSessionId();
+        document.getElementById('instructions').style.display = 'none';
+        document.getElementById('startButton').style.display = 'none';
+        document.getElementById('basic-question-section').style.display = 'block';
+        showQuestion(currentQuestionIndex);
+    }
+
+    function showQuestion(index) {
+        const questionText = questions[index];
+        document.getElementById('question').textContent = questionText;
+        const utterance = new SpeechSynthesisUtterance(questionText);
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function startRecording() {
+        if (recognition) {
+            recognition.start();
+            document.getElementById('startRecordingButton').style.display = 'none';
+            document.getElementById('stopRecordingButton').style.display = 'block';
+        }
+    }
+
+    function stopRecording() {
+        if (recognition) {
+            recognition.stop();
+            document.getElementById('startRecordingButton').style.display = 'block';
+            document.getElementById('stopRecordingButton').style.display = 'none';
+        }
+    }
+
+    function nextQuestion() {
+        const response = document.getElementById('response').value;
+        if (response) {
+            responses[questions[currentQuestionIndex]] = response;
+        }
+
+        document.getElementById('response').value = '';
+
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        } else {
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('startRecordingButton').style.display = 'none';
+            document.getElementById('stopRecordingButton').style.display = 'none';
+
+            document.getElementById('finishButton').style.display = 'block';
+            document.getElementById('completionMessage').style.display = 'block';
+            document.getElementById('question').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+            const completionUtterance = new SpeechSynthesisUtterance('You have completed the Basic Questions. Please proceed to the next section.');
+            window.speechSynthesis.speak(completionUtterance);
+        }
+
+        stopRecording();
+    }
+
+    function finishBasicQuestions() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/user/exam/basic';
+
+        const inputSessionId = document.createElement('input');
+        inputSessionId.type = 'hidden';
+        inputSessionId.name = 'session_id';
+        inputSessionId.value = sessionId;
+        form.appendChild(inputSessionId);
+
+        for (let i = 0; i < questions.length; i++) {
+            const question = questions[i];
+            const response = responses[question];
+
+            const inputQuestion = document.createElement('input');
+            inputQuestion.type = 'hidden';
+            inputQuestion.name = `question-${i + 1}`;
+            inputQuestion.value = question;
+            form.appendChild(inputQuestion);
+
+            const inputResponse = document.createElement('input');
+            inputResponse.type = 'hidden';
+            inputResponse.name = `response-${i + 1}`;
+            inputResponse.value = response || '';
+            form.appendChild(inputResponse);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    window.onbeforeunload = () => {
+        if (recognition) {
+            recognition.stop();
+        }
+        window.speechSynthesis.cancel();
+    };
+
+    window.onload = () => {
+        playInstructions();
+        document.getElementById('startButton').disabled = true;
+    };
+</script>
+{% endblock %}

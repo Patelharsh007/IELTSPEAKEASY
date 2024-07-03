@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                
+                <div class="card-header" style="background-color: cadetblue; color: white;">
+                    <h3 class="mb-0">Admin Registration</h3>
+                </div>
+                <div class="card-body">
+                    <form id="registrationForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                    </form>
+                </div>
+            </div>
+            <div id="registrationMessage" class="alert mt-3" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <br/>
+    <br/>
+</div>
+
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        
+        var form = event.target;
+        var formData = new FormData(form);
+        var requestData = {};
+        
+        formData.forEach(function(value, key){
+            requestData[key] = value;
+        });
+        
+        fetch('/admin/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var registrationMessage = document.getElementById('registrationMessage');
+
+            if (data.error) {
+                registrationMessage.textContent = data.error;
+                registrationMessage.className = 'alert alert-danger';
+                registrationMessage.style.display = 'block';
+                return;
+            }
+
+            else{
+            registrationMessage.textContent = data.message;
+            registrationMessage.className = 'alert alert-success';
+            registrationMessage.style.display = 'block';
+            // Optionally, redirect to another page after successful registration
+            setTimeout(function() {
+                window.location.href = '/';
+            }, 5000);
+            //window.location.href = '/login';
+        }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            var registrationMessage = document.getElementById('registrationMessage');
+            registrationMessage.textContent = 'An error occurred. Please try again.';
+            registrationMessage.className = 'alert alert-danger';
+            registrationMessage.style.display = 'block';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - IELTS SpeakEasy{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    
+    <h1>{{ user.role.title() }} Profile</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <p>
+                <a href="#" title="Update Username" data-toggle="modal" data-target="#updateUsernameModal">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <strong>Username:</strong> {{ user.username }}
+                <!-- Icon for updating username -->
+
+            </p>
+            <p>
+                <a href="#" title="Update Email" data-toggle="modal" data-target="#updateEmailModal">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <strong>Email:</strong> {{ user.email }}
+                <!-- Icon for updating email -->
+
+            </p>
+            <p>
+                <!-- Link to open password change modal -->
+                <a href="#" title="Change Password" data-toggle="modal" data-target="#changePasswordModal">
+                    Change Password
+                </a>
+            </p>
+            <!-- Add other user profile information here -->
+        </div>
+    </div>
+</div>
+
+
+<!-- update Modals-->
+<!-- Update Username Modal -->
+<div class="modal fade" id="updateUsernameModal" tabindex="-1" role="dialog" aria-labelledby="updateUsernameModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateUsernameModalLabel">Update Username</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="updateUsernameForm" method="POST" action="{{ url_for('update_username') }}">
+                    <div class="form-group">
+                        <label for="username">New Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required
+                            placeholder="Enter New Username">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal"
+                            id="cancelUpdateUsername">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Email Modal -->
+<div class="modal fade" id="updateEmailModal" tabindex="-1" role="dialog" aria-labelledby="updateEmailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateEmailModalLabel">Update Email</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="updateEmailForm" method="POST" action="{{ url_for('update_email') }}">
+                    <div class="form-group">
+                        <label for="email">New Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required
+                            placeholder="Enter New Email">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal"
+                            id="cancelUpdateEmail">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" method="POST" action="{{ url_for('update_password') }}">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Enter Current Password" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="current_password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="new_password" name="new_password" required placeholder="Enter New Password">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="new_password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Re-Enter New Password">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirm_password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal" id="cancelUpdatePassword">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    function showCancelAlert() {
+        let alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-info alert-dismissible fade show';
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = 'Request canceled';
+        document.querySelector('.container').prepend(alertDiv);
+
+        // Automatically remove the alert after 3 seconds
+        setTimeout(function () {
+            alertDiv.classList.remove('show');
+            alertDiv.classList.add('fade');
+            setTimeout(function () {
+                alertDiv.remove();
+            }, 500); // Allow time for fade out animation
+        }, 3000);
+    }
+
+    document.getElementById('cancelUpdateUsername').addEventListener('click', showCancelAlert);
+    document.getElementById('cancelUpdatePassword').addEventListener('click', showCancelAlert);
+    document.getElementById('cancelUpdateEmail').addEventListener('click', showCancelAlert);
+
+    // Automatically remove any success alerts after 3-4 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        let successAlerts = document.querySelectorAll('.alert-success');
+        successAlerts.forEach(function (alert) {
+            setTimeout(function () {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(function () {
+                    alert.remove();
+                }, 500); // Allow time for fade out animation
+            }, 3000); // 3 seconds before starting fade out
+        });
+    });
+
+    // Automatically remove any danger alerts after 3-4 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        let dangerAlerts = document.querySelectorAll('.alert-danger');
+        dangerAlerts.forEach(function (alert) {
+            setTimeout(function () {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(function () {
+                    alert.remove();
+                }, 500); // Allow time for fade out animation
+            }, 3000); // 3 seconds before starting fade out
+        });
+    });
+
+        // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            let targetId = this.getAttribute('data-target');
+            let inputField = document.getElementById(targetId);
+
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                inputField.type = 'password';
+                this.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
+    
+</script>
+
+<br />
+<br />
+{% endblock %}

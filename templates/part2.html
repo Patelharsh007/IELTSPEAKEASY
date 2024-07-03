@@ -1,0 +1,175 @@
+{% extends "user_dash.html" %}
+
+{% block title %}IELTS Exam - Part 2{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center vh-100">
+    <div class="text-center w-75">
+        <h1>Part 2: Cue Card</h1>
+        <p id="instructions">Instructions will be spoken shortly. Please wait...</p>
+        <p>Refresh the page until the button is disabled if the instructions are not spoken.</p>
+        <button id="startButton" class="btn btn-primary mt-3" onclick="startExam()">Start Part 2</button>
+
+        <div id="part2-cue-card-section" style="display:none;">
+            <h2 id="cueCard" class="mt-4">{{ cue_card.cue_card }}</h2>
+            <ul class="list-group mt-2">
+                {% for point in cue_card.points.split(',') %}
+                    <li class="list-group-item text-left">{{ point }}</li>
+                {% endfor %}
+            </ul>
+            <textarea id="response" class="form-control mt-2" rows="5" placeholder="Speak your response or type here..." readonly></textarea>
+            <div class="mt-3">
+                <button id="startRecordingButton" class="btn btn-success" onclick="startRecording()">Start Recording</button>
+                <button id="stopRecordingButton" class="btn btn-warning" onclick="stopRecording()" style="display:none;">Stop Recording</button>
+                <button id="finishButton" class="btn btn-danger" onclick="finishPart2()" style="display:block;">Finish Part 2</button>
+            </div>
+            
+           
+        </div>
+    </div>
+</div>
+
+<script>
+    let recognition;
+    const cueCard = '{{ cue_card.cue_card }}';
+    let isRecording = false;
+
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (window.SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                }
+            }
+            document.getElementById('response').value += finalTranscript.trim();
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error: ', event.error);
+            alert('Speech recognition error. Please try again.');
+        };
+    } else {
+        alert("Your browser does not support speech recognition. Please use a supported browser.");
+    }
+
+    function playInstructions() {
+        const instruction = new SpeechSynthesisUtterance('This is Part 2 of the exam. You will receive a cue card question. Please answer clearly and concisely after the cue card is spoken. Click the Start Recording button to begin.');
+        instruction.onend = () => {
+            document.getElementById('startButton').disabled = false;
+        };
+        window.speechSynthesis.speak(instruction);
+    }
+
+    function startExam() {
+        document.getElementById('instructions').style.display = 'none';
+        document.getElementById('startButton').style.display = 'none';
+        document.getElementById('part2-cue-card-section').style.display = 'block';
+
+        const cueCardUtterance = new SpeechSynthesisUtterance(cueCard);
+        cueCardUtterance.onend = () => {
+            const includeUtterance = new SpeechSynthesisUtterance('You may include:');
+            includeUtterance.onend = () => {
+                const points = {{ cue_card.points.split(',') | tojson }};
+                speakPoints(points, 0);
+            };
+            window.speechSynthesis.speak(includeUtterance);
+        };
+        window.speechSynthesis.speak(cueCardUtterance);
+
+        // Disable the button during the introduction
+        document.getElementById('startButton').disabled = true;
+    }
+
+    function speakPoints(points, index) {
+        if (index < points.length) {
+            const pointUtterance = new SpeechSynthesisUtterance(points[index]);
+            pointUtterance.onend = () => {
+                speakPoints(points, index + 1);
+            };
+            window.speechSynthesis.speak(pointUtterance);
+        } else {
+            document.getElementById('startButton').disabled = false;
+        }
+    }
+
+    function startRecording() {
+        if (recognition) {
+            recognition.start();
+            document.getElementById('startRecordingButton').style.display = 'none';
+            document.getElementById('stopRecordingButton').style.display = 'block';
+            isRecording = true;
+        }
+    }
+
+    function stopRecording() {
+        if (recognition) {
+            recognition.stop();
+            document.getElementById('startRecordingButton').style.display = 'block';
+            document.getElementById('stopRecordingButton').style.display = 'none';
+            isRecording = false;
+        }
+    }
+
+    function finishPart2() {
+        const recordedResponse = document.getElementById('response').value.trim();
+        if (recordedResponse) {
+            const endUtterance = new SpeechSynthesisUtterance('You have successfully completed Part 2. Please proceed to the next section.');
+            
+
+            endUtterance.onend = () => {               
+
+                // Submit the recorded response to the backend after a short delay
+                setTimeout(() => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/user/exam/part2';
+                    const sessionIdInput = document.createElement('input');
+                    sessionIdInput.type = 'hidden';
+                    sessionIdInput.name = 'session_id';
+                    sessionIdInput.value = '{{ session_id }}';
+                    form.appendChild(sessionIdInput);
+                    const cueCardInput = document.createElement('input');
+                    cueCardInput.type = 'hidden';
+                    cueCardInput.name = 'cue_card_question';
+                    cueCardInput.value = cueCard;
+                    form.appendChild(cueCardInput);
+                    const responseInput = document.createElement('input');
+                    responseInput.type = 'hidden';
+                    responseInput.name = 'response';
+                    responseInput.value = recordedResponse;
+                    form.appendChild(responseInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }, 1); // Adjust the delay as needed
+            };
+
+            // Speak the completion message
+            window.speechSynthesis.speak(endUtterance);
+
+        } else {
+            alert('Please provide a response before finishing Part 2.');
+        }
+    }
+
+    window.onbeforeunload = () => {
+        if (recognition && isRecording) {
+            recognition.stop();
+            isRecording = false;
+        }
+        window.speechSynthesis.cancel();
+    };
+
+    window.onload = () => {
+        playInstructions();
+        document.getElementById('startButton').disabled = true;
+    };
+</script>
+{% endblock %}

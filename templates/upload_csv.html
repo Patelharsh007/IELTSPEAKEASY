@@ -1,0 +1,72 @@
+{% extends "admin_dash.html" %}
+{% block title %}Admin Dashboard - IELTS SpeakEasy{% endblock %}
+{% block content %}
+<br/>
+    <h2>Upload CSV</h2>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <br/>
+    {% for category, message in messages %}
+    <div id="alertMessage" class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+        role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Upload Part 1 Questions CSV
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/admin/upload-part1" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="file" name="file" class="form-control-file">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Upload Part 2 Cue Cards CSV
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/admin/upload-part2" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="file" name="file" class="form-control-file">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+// Automatically remove any success alerts after 3-4 seconds
+document.addEventListener('DOMContentLoaded', function () {
+            let successAlerts = document.querySelectorAll('.alert-success');
+
+            successAlerts.forEach(function (alert) {
+                setTimeout(function () {
+                    alert.classList.remove('show');
+                    alert.classList.add('fade');
+                    setTimeout(function () {
+                        alert.remove();
+                    }, 500); // Allow time for fade out animation
+                }, 3000); // 3 seconds before starting fade out
+            });
+        });
+</script>
+    
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "user_dash.html" %}
+
+{% block title %}IELTS Exam - Part 3{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center w-75">
+        <h1>Part 3: Follow-up Questions</h1>
+        <p id="instructions">Instructions will be spoken shortly. Please wait...</p>
+        <button id="startButton" class="btn btn-primary mt-3" onclick="startExam()">Start Part 3</button>
+
+        <div id="part3-question-section" style="display:none;">
+            <h2 id="question" class="mt-4"></h2>
+            <textarea id="response" class="form-control mt-2" rows="3" readonly></textarea>
+            <div class="mt-3">
+                <button id="startRecordingButton" class="btn btn-success" onclick="startRecording()">Start Recording</button>
+                <button id="stopRecordingButton" class="btn btn-warning" onclick="stopRecording()" style="display:none;">Stop Recording</button>
+                <button id="nextButton" class="btn btn-secondary" onclick="nextQuestion()">Next Question</button>
+                <button id="finishButton" class="btn btn-danger" onclick="finishPart3()" style="display:none;">Finish Part 3</button>
+            </div>
+            <div id="completionMessage" style="display:none;" class="mt-4 alert alert-success">
+                <p>You have completed Part 3. Please proceed to the next section.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let recognition;
+    let currentQuestionIndex = 0;
+    const questions = {{ part3_questions|tojson }};
+    const responses = {};
+
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (window.SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                }
+            }
+            document.getElementById('response').value += finalTranscript.trim();
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error: ', event.error);
+            alert('Speech recognition error. Please try again.');
+        };
+    } else {
+        alert("Your browser does not support speech recognition. Please use a supported browser.");
+    }
+
+    function playInstructions() {
+        const instruction = new SpeechSynthesisUtterance('This is Part 3 of the exam. You will receive follow-up questions. Please answer each question clearly after it is spoken. Click the Start Recording button to respond.');
+        instruction.onend = () => {
+            document.getElementById('startButton').disabled = false;
+        };
+        window.speechSynthesis.speak(instruction);
+    }
+
+    function startExam() {
+        document.getElementById('instructions').style.display = 'none';
+        document.getElementById('startButton').style.display = 'none';
+        document.getElementById('part3-question-section').style.display = 'block';
+        showQuestion(currentQuestionIndex);
+    }
+
+    function showQuestion(index) {
+        const questionText = questions[index];
+        document.getElementById('question').textContent = questionText;
+        const questionUtterance = new SpeechSynthesisUtterance(questionText);
+        window.speechSynthesis.speak(questionUtterance);
+    }
+
+    function startRecording() {
+        if (recognition) {
+            recognition.start();
+            document.getElementById('startRecordingButton').style.display = 'none';
+            document.getElementById('stopRecordingButton').style.display = 'block';
+        }
+    }
+
+    function stopRecording() {
+        if (recognition) {
+            recognition.stop();
+            document.getElementById('startRecordingButton').style.display = 'block';
+            document.getElementById('stopRecordingButton').style.display = 'none';
+        }
+    }
+
+    function nextQuestion() {
+        const response = document.getElementById('response').value;
+        if (response) {
+            responses[questions[currentQuestionIndex]] = response;
+        }
+
+        document.getElementById('response').value = '';
+
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        } else {
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('finishButton').style.display = 'block';
+            document.getElementById('completionMessage').style.display = 'block';
+            document.getElementById('question').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+            document.getElementById('startRecordingButton').style.display = 'none';
+            const completionUtterance = new SpeechSynthesisUtterance('You have completed Part 3. Please proceed to the next section.');
+            window.speechSynthesis.speak(completionUtterance);
+        }
+
+        stopRecording();
+    }
+
+    function finishPart3() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/user/exam/part3';
+        form.innerHTML = `<input type="hidden" name="session_id" value="{{ session_id }}">`;
+
+        questions.forEach((question, index) => {
+            const response = responses[question];
+
+            const inputQuestion = document.createElement('input');
+            inputQuestion.type = 'hidden';
+            inputQuestion.name = `follow_up_questions`;
+            inputQuestion.value = question;
+            form.appendChild(inputQuestion);
+
+            const inputResponse = document.createElement('input');
+            inputResponse.type = 'hidden';
+            inputResponse.name = `responses`;
+            inputResponse.value = response || '';
+            form.appendChild(inputResponse);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    window.onbeforeunload = () => {
+        if (recognition) {
+            recognition.stop();
+        }
+        window.speechSynthesis.cancel();
+    };
+
+    window.onload = () => {
+        playInstructions();
+        document.getElementById('startButton').disabled = true;
+    };
+</script>
+{% endblock %}

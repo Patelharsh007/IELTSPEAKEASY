@@ -1,0 +1,11 @@
+/* sidebar.css */
+
+/* Custom styles for sidebar */
+.nav-link:hover {
+  background-color: rgb(136, 181, 183);
+}
+
+.nav-link.active {
+  background-color: cadetblue;
+  color: #ffffff !important;
+}

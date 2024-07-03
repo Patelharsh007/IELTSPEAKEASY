@@ -1,0 +1,57 @@
+{% extends "user_dash.html" %}
+{% block title %}Admin Dashboard - IELTS SpeakEasy{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">IELTS Part 1 Questions</h1>
+    <div class="table-responsive scrollable-table">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Question</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in part1_questions %}
+                <tr>
+                    <td>{{ question.category }}</td>
+                    <td>{{ question.question }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h1 class="mt-5 mb-4">IELTS Part 2 Cue Cards</h1>
+    <div class="table-responsive scrollable-table">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Cue Card</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for card in part2_cue_cards %}
+                <tr>
+                    <td>{{ card.cue_card }}</td>
+                    <td>
+                        <ul>
+                            {% for point in card.points.split(',') %}
+                            <li>{{ point }}</li>
+                            {% endfor %}
+                        </ul>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<br/>
+<br/>
+{% endblock %}
