@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IELTS SpeakEasy{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='sidebar.css') }}">
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="/">IELTS SpeakEasy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">Admin Panel</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container-fluid" >
+        <div class="row" >
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar" >
+                <br/>
+                <div class="sidebar-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a id="usersLink" class="nav-link {% if active_page == 'users' %}active{% endif %}" href="/admin/users">
+                                View Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="adminsLink" class="nav-link {% if active_page == 'admins' %}active{% endif %}" href="/admin/admins">
+                                View Admins
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="uploadCSVLink" class="nav-link {% if active_page == 'upload_csv' %}active{% endif %}" href="/admin/upload-csv">
+                                Upload CSV
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="viewDetailsLink" class="nav-link {% if active_page == 'view_details' %}active{% endif %}" href="/admin/display-questions">
+                                View Questions
+                            </a>
+                        </li>
+                        <!-- Add more sidebar items as needed -->
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content area -->
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="content">
+                    <div class="text-center">
+                        <h1>Admin Panel</h1>
+                    </div>
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript for sidebar collapse/expand -->
+    <script>
+        $(document).ready(function () {
+            // Add click event listener to each nav-link
+            $('#sidebar .nav-link').on('click', function () {
+                // Remove active class from all nav-links
+                $('#sidebar .nav-link').removeClass('active');
+                // Add active class to the clicked nav-link
+                $(this).addClass('active');
+                // Store the active page in localStorage
+                localStorage.setItem('activePage', $(this).attr('id'));
+            });
+
+            // Set the active class based on localStorage
+            var activePage = localStorage.getItem('activePage');
+            if (activePage) {
+                $('#' + activePage).addClass('active');
+            }
+        });
+    </script>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+    var alertMessage = document.getElementById('alertMessage');
+    
+    // Check if the alert message exists
+    if (alertMessage) {
+        // Hide the alert message after 3 seconds
+        setTimeout(function() {
+            alertMessage.style.display = 'none';
+        }, 3000); // 3 seconds
+    }
+});
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <span class="text-muted small">© 2021 IELTS SpeakEasy. All rights reserved.</span>
+        </div>
+    </footer>
+</body>
+
+</html>

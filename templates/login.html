@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header" style="background-color: cadetblue; color: white;">
+                    <h3 class="mb-0">Login</h3>
+                </div>
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </form>
+                </div>
+            </div>
+            <div id="loginMessage" class="alert mt-3" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+<br/>
+<br/>
+
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        
+        var form = event.target;
+        var formData = new FormData(form);
+        var requestData = {};
+        
+        formData.forEach(function(value, key){
+            requestData[key] = value;
+        });
+        
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var loginMessage = document.getElementById('loginMessage');
+            if (data.message) {
+                loginMessage.textContent = data.message;
+                loginMessage.className = 'alert alert-success';
+                loginMessage.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = '/profile'
+                }, 3000);   // Redirect after 3 seconds
+            } else if (data.error) {
+                loginMessage.textContent = data.error;
+                loginMessage.className = 'alert alert-danger';
+                loginMessage.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            var loginMessage = document.getElementById('loginMessage');
+            loginMessage.textContent = 'An error occurred. Please try again later.';
+            loginMessage.className = 'alert alert-danger';
+            loginMessage.style.display = 'block';
+        });
+    });
+</script>
+{% endblock %}

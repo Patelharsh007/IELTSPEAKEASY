@@ -1,0 +1,40 @@
+{% extends "user_dash.html" %}
+
+{% block title %}IELTS Exam{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center">
+    <div class="text-center">
+        <h1>Welcome to the Exam</h1>
+        <p id="instructions">Instructions will be spoken shortly. Please wait...</p>
+        <button id="startButton" class="btn btn-primary mt-3" onclick="startExam()" disabled>Start Exam</button>
+    </div>
+
+    <script>
+        function playInstructions() {
+            const greeting = new SpeechSynthesisUtterance('Welcome to the IELTS Speaking Exam.');
+            const introduction = new SpeechSynthesisUtterance('Please click the Start Exam button to begin.');
+
+            greeting.onend = () => {
+                window.speechSynthesis.speak(introduction);
+            };
+
+            introduction.onend = () => {
+                document.getElementById('instructions').textContent = 'You may now start the exam.';
+                document.getElementById('startButton').disabled = false;
+            };
+
+            window.speechSynthesis.speak(greeting);
+        }
+
+        function startExam() {
+            window.location.href = "/user/exam/basic";
+        }
+
+        window.onload = () => {
+            setTimeout(playInstructions, 2000);
+        };
+    </script>
+</div>
+
+{% endblock %}

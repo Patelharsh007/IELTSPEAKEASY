@@ -1,0 +1,178 @@
+/* Navbar styles */
+.navbar {
+    padding: 1rem;
+    background-color: cadetblue;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+    margin-left: 1rem;
+    color: white;
+}
+
+
+/* Hero section styles */
+.hero {
+    background-image: url('./g.png');
+    /* Replace with your image URL */
+    background-size: cover;
+    color: #fff;
+    text-align: center;
+    padding: 6rem 0;
+    height: 500px;
+}
+
+/* .hero h1 {
+    text-align: right;
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: cadetblue;
+}
+
+.hero p {
+    text-align: right;
+    font-size: 1.25rem;
+    color:white
+} */
+
+/* About Us section styles */
+.about-section {
+    margin-top: 4rem;
+}
+
+.about-section img {
+    border-radius: 10px;
+}
+
+/* How It Works section styles */
+.works-section {
+    margin-top: 4rem;
+}
+
+.works-section .card {
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.works-section .card:hover {
+    transform: translateY(-5px);
+}
+
+/* Testimonials Section */
+.testimonials-section {
+    background-color: white;
+    padding: 50px 0;
+}
+
+.testimonials-section h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.testimonials-section .card {
+    border: none;
+    background-color: rgba(0, 208, 255, 0.137);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.testimonials-section .card:hover {
+    transform: translateY(-10px);
+}
+
+.testimonials-section .card-body {
+    padding: 30px;
+}
+
+.testimonials-section .profile-picture {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 3px solid #007bff;
+}
+
+.testimonials-section .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #007bff;
+}
+
+.testimonials-section .card-subtitle {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.testimonials-section .card-text {
+    font-size: 1rem;
+    color: #555;
+    margin-top: 15px;
+}
+
+
+/* Footer styles */
+.footer {
+    background-color: cadetblue;
+    color: #000000;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.footer p {
+    margin: 0;
+}
+
+.contact-section {
+    background-color: #f9f9f9;
+    padding: 50px 0;
+}
+
+.contact-section h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.contact-section .form-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.contact-section .form-control {
+    border-radius: 0;
+    box-shadow: none;
+    border-color: #ddd;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.contact-section .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.contact-section .btn {
+    border-radius: 0;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    background-color: #007bff;
+    border-color: #007bff;
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.contact-section .btn:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Optional: Custom styling for the table or other elements */
+.table-responsive {
+    max-height: 400px;
+    /* Adjust the max height as needed */
+    overflow-y: auto;
+}
