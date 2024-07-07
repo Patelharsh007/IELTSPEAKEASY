@@ -18,6 +18,7 @@ from bson import ObjectId
 from functools import wraps
 import pandas as pd
 from flask_socketio import SocketIO, emit
+import markdown
 
 import google.generativeai as genai
 import os
@@ -677,20 +678,6 @@ def evaluate_exam():
         }
         overall_evaluation = ''
 
-        # # Evaluate Basic Questions
-        # if response_record.basic_questions:
-        #     basic_prompt = (
-        #         f"Evaluate the following responses based on the criteria for IELTS speaking test.\n"
-        #         f"Responses: {response_record.basic_questions}\n"
-        #         f"Criteria: {', '.join(criteria)}\n"
-        #         f"Band Score: "
-        #     )
-        #     basic_result = model.generate_content(basic_prompt)
-        #     scores['basic'] = basic_result.text
-        #     band_scores['basic'] = evaluate_to_band_score(response_record.basic_questions,criteria)
-        #     band_scores['basic']=float(band_scores['basic'])
-        #     print(band_scores['basic'])
-
         # Evaluate Part 1 Questions
         if response_record.part1_questions:
             part1_prompt = (
@@ -701,9 +688,7 @@ def evaluate_exam():
             )
             part1_result = model.generate_content(part1_prompt)
             scores['part1'] = part1_result.text
-            band_scores['part1'] = evaluate_to_band_score(response_record.part1_questions,criteria)
-            band_scores['part1']=float(band_scores['part1'])
-            print(band_scores['part1'])
+            band_scores['part1'] = extract_band_score(scores['part1']) or evaluate_to_band_score(response_record.part1_questions, criteria)
 
         # Evaluate Part 2 Cue Card
         if response_record.part2_cue_card:
@@ -717,17 +702,12 @@ def evaluate_exam():
                 )
                 part2_result = model.generate_content(part2_prompt)
                 scores['part2'] = part2_result.text
-                
-
-                print(part2_result)
-                band_scores['part2'] = evaluate_to_band_score(part2_response,criteria)
-                band_scores['part2']=float(band_scores['part2'])
-                print(band_scores['part2'])
+                band_scores['part2'] = extract_band_score(scores['part2']) or evaluate_to_band_score(part2_response, criteria)
 
         # Evaluate Part 3 Answers
         if response_record.part3_answers:
             part3_responses = [answer for answer in response_record.part3_answers]
-            pt=[answer[1] for answer in response_record.part3_answers if answer[1]]
+            pt = [answer[1] for answer in response_record.part3_answers if answer[1]]
             if part3_responses:
                 part3_prompt = (
                     f"Evaluate the following responses based on the criteria for IELTS speaking test.\n"
@@ -735,18 +715,16 @@ def evaluate_exam():
                     f"Criteria: {', '.join(criteria)}\n"
                     f"Band Score: "
                 )
-
                 part3_result = model.generate_content(part3_prompt)
                 scores['part3'] = part3_result.text
-                band_scores['part3'] = evaluate_to_band_score(pt,criteria)
-                band_scores['part3']=float(band_scores['part3'])
-                print(band_scores['part3'])
+                band_scores['part3'] = extract_band_score(scores['part3']) or evaluate_to_band_score(pt, criteria)
 
-        addn=band_scores['part1']+band_scores['part2']+band_scores['part3']
+        addn = band_scores['part1'] + band_scores['part2'] + band_scores['part3']
 
         # Calculate Overall Evaluation
-        overall_score = addn/3
-        overall_band = float(overall_score)  # Convert overall score to integer band score
+        overall_score = addn / 3
+        overall_band = float(overall_score)
+        overall_band = round(overall_band * 2) / 2
 
         # Example: Assigning overall_evaluation based on overall_band
         if overall_band >= 7:
@@ -756,24 +734,27 @@ def evaluate_exam():
         else:
             overall_evaluation = "Needs improvement."
 
-        # Save Evaluation Results
+        # Update the existing response record with evaluation 
+        scores['part1'] = markdown.markdown(scores['part1'])
+        scores['part2'] = markdown.markdown(scores['part2'])
+        scores['part3'] = markdown.markdown(scores['part3'])
         response_record.scores = scores
         response_record.band_scores = band_scores
         response_record.overall_evaluation = overall_evaluation
-        # response_record.overall_band = overall_band
+        response_record.overall_band=overall_band
         response_record.save(mongo)
 
-        return render_template('exam_results.html', 
-                               scores=scores, 
-                               band_scores=band_scores, 
+        return render_template('exam_results.html',
+                               scores=scores,
+                               band_scores=band_scores,
                                overall_evaluation=overall_evaluation,
                                overall_band=overall_band)
     
     except Exception as e:
         return str(e), 500
-   
-def evaluate_to_band_score(response,criteria):
-    prompt = f"Evaluate the response:\n{response} based on {criteria} and give score in the range of 0-9 as in ielts exams but rember you only have to return the output as Band Score:score and no any comment or anything yes or no not single thing and score according if empty recived"
+    
+def evaluate_to_band_score(response, criteria):
+    prompt = f"Evaluate the response:\n{response} based on {criteria} and give score in the range of 0-9 as in IELTS exams but remember you only have to return the output as Band Score: score and no any comment or anything yes or no not single thing and score according if empty received"
     model = genai.GenerativeModel('gemini-1.0-pro-latest')
     result = model.generate_content(prompt)
     
@@ -782,12 +763,102 @@ def evaluate_to_band_score(response,criteria):
     for line in lines:
         if line.startswith("Band Score:"):
             try:
-                band_score =(line.split(":")[1].strip())
+                band_score = line.split(":")[1].strip()
                 return band_score
             except ValueError:
                 pass  # Handle cases where band score is not an integer or not found
     
     return float(0)  # Default to 0 if band score is not found or can't be extracted
+
+# Extract band score from the generated content
+def extract_band_score(text):
+    model = genai.GenerativeModel('gemini-1.0-pro-latest')
+    prompt = f"Extract band score:from \n{text}\n \n and return the band score as in IELTS exams but remember you only have to return the output as Band Score: score and no any comment or anything yes or no not single thing"
+    result = model.generate_content(prompt)
+
+
+    # Extract band score from the result
+    lines = result.text.splitlines()
+    for line in lines:
+        if line.startswith("Band Score:"):
+            try:
+                band_score = line.split(":")[1].strip()
+                return float(band_score)
+            except ValueError:
+                pass  # Handle cases where band score is not an integer or not found
+    
+    return None
+
+#List exam by user   
+@app.route('/user/exams')
+def list_exams():
+    try:
+        user_id = current_user._id
+        print(user_id)
+        exams = Response.get_by_user_id(mongo, user_id)
+        return render_template('exams_list.html', exams=exams)
+    except Exception as e:
+        app.logger.error(f"Failed to list exams: {str(e)}")
+        return str(e), 500
+
+#exam details by session id
+@app.route('/exam/<exam_session_id>')
+def exam_details(exam_session_id):
+    try:
+        user_id = current_user._id  # Adjust as per your authentication mechanism
+        exam = Response.get_by_session_id_and_user_id(mongo, exam_session_id, user_id)
+        print(exam)
+        if not exam:
+            return "Exam not found.", 404
+        return render_template('exam_details.html', exam=exam)
+    except Exception as e:
+        app.logger.error(f"Failed to fetch exam details: {str(e)}")
+        return str(e), 500
+
+#list for users for admin
+
+#user info
+@app.route('/admin/users_exam', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def users_exam():
+    if request.method == 'GET':    
+        users = User.get_all_users(mongo)
+        return render_template('admin_users_exam.html', users=users, active='users')
+    
+    return render_template('admin_users_exam.html', active='View Users')
+
+
+from bson import ObjectId
+
+@app.route('/admin/user/<user_id>/exams')
+@admin_required
+def admin_user_exams(user_id):
+    try:
+        user = User.get_by_id(mongo, user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        exams = Response.get_by_user_id(mongo, ObjectId(user_id))
+        print(exams)  # For debugging
+        return render_template('admin_user_exams_data.html', user=user, exams=exams)
+    except Exception as e:
+        app.logger.error(f"Failed to fetch exams for user {user_id}: {str(e)}")
+        return str(e), 500
+
+
+
+@app.route('/admin/exam/<exam_session_id>')
+@admin_required
+def admin_exam_details(exam_session_id):
+    try:
+        exam = Response.get_by_session_id(mongo, exam_session_id)
+        if not exam:
+            return "Exam not found.", 404
+        return render_template('admin_exam_details.html', exam=exam)
+    except Exception as e:
+        app.logger.error(f"Failed to fetch exam details: {str(e)}")
+        return str(e), 500
 
 
 
