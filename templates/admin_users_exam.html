@@ -1,0 +1,55 @@
+{% extends "admin_dash.html" %}
+
+{% block title %}Admin Dashboard - IELTS SpeakEasy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br/>
+    <h2>User Management</h2>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <br/>
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="text-right mb-3">
+        <a href="/user/register" class="btn btn-success">Add New User</a>
+    </div>
+
+    <h3>Users</h3>
+    <!-- User Management Table -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <!-- <th scope="col">User ID</th> -->
+                    <th scope="col">Username</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <!-- <td>{{ user._id }}</td> -->
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <a href="/admin/user/{{ user._id }}/exams" class="btn btn-primary btn-sm">View Exam Sessions</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br/>
+<br/>
+{% endblock %}

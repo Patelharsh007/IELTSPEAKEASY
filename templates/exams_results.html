@@ -1,0 +1,92 @@
+{% extends "user_dash.html" %}
+
+{% block title %}IELTS Exam - Part 1{% endblock %}
+
+{% block content %}
+<h2 class="text-center mb-4">IELTS Speaking Exam Results</h2>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="text-center">Overall Evaluation</h3>
+                <div class="overall-score text-center mb-4">
+                    <p>Overall Band Score: <span class="text-primary">{{ overall_band }}</span></p>
+                    <p>Overall Evaluation: <span class="text-primary">{{ overall_evaluation }}</span></p>
+                </div>
+
+                <h3 class="text-center">Part-wise Scores</h3>
+                <table class="table table-bordered score-table text-center mt-4">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Exam Part</th>
+                            <th>Score</th>
+                            <th>Evaluation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Part 1 Questions</td>
+                            <td>{{ band_scores.part1 }}</td>
+                            <td>{{ scores.part1 | safe }}</td>
+                        </tr>
+                        <tr>
+                            <td>Part 2 Cue Card</td>
+                            <td>{{ band_scores.part2 }}</td>
+                            <td>{{ scores.part2 | safe }}</td>
+                        </tr>
+                        <tr>
+                            <td>Part 3 Answers</td>
+                            <td>{{ band_scores.part3 }}</td>
+                            <td>{{ scores.part3 | safe }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Custom CSS -->
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+    .container {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    h2, h3 {
+        color: #007bff;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .overall-score p {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .score-table {
+        margin-top: 20px;
+    }
+    .score-table th, .score-table td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+</style>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

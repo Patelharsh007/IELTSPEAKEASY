@@ -1,0 +1,48 @@
+{% extends "user_dash.html" %}
+
+{% block title %}Exam Details{% endblock %}
+
+{% block content %}
+<h2 class="text-center mb-4">Exam Details - {{ exam.exam_session_id }}</h2>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="text-center">Overall Evaluation</h3>
+                <div class="overall-score text-center mb-4">
+                    <p>Overall Band Score: <span class="text-primary">{{ exam.overall_band }}</span></p>
+                    <p>Overall Evaluation: <span class="text-primary">{{ exam.overall_evaluation }}</span></p>
+                </div>
+
+                <h3 class="text-center">Part-wise Scores</h3>
+                <table class="table table-bordered score-table text-center mt-4">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Exam Part</th>
+                            <th>Band Score</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Part 1 Questions</td>
+                            <td>{{ exam.band_scores.part1 }}</td>
+                            <td>{{ exam.scores.part1 | safe}}</td>
+                        </tr>
+                        <tr>
+                            <td>Part 2 Cue Card</td>
+                            <td>{{ exam.band_scores.part2 }}</td>
+                            <td>{{ exam.scores.part2 | safe }}</td>
+                        </tr>
+                        <tr>
+                            <td>Part 3 Answers</td>
+                            <td>{{ exam.band_scores.part3 }}</td>
+                            <td>{{ exam.scores.part3 | safe }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
