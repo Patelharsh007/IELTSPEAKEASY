@@ -1,0 +1,55 @@
+{% extends "user_dash.html" %}
+
+{% block title %}Exam Details{% endblock %}
+
+{% block content %}
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="mt-4 mb-4">Exam List</h2>
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Exam Session ID</th>
+                            <th>Timestamp</th>
+                            <th>Overall Band</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exam in exams %}
+                        <tr>
+                            <td>{{ exam.exam_session_id }}</td>
+                            <td>{{ exam.timestamp }}</td>
+                            <td>{{ exam.overall_band }}</td>
+                            <td><a href="{{ url_for('exam_details', exam_session_id=exam.exam_session_id) }}" class="btn btn-primary">Show Details</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
