@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Made%20with-Python-blue?style=for-the-badge&logo=python" alt="Made with Python">
   <img src="https://img.shields.io/badge/Uses-Google%20Generative%20AI-yellow?style=for-the-badge&logo=google-cloud" alt="Uses Google Generative AI">
   <img src="https://img.shields.io/badge/Uses-Flask-green?style=for-the-badge&logo=flask" alt="Uses Flask">
-  <img src="https://img.shields.io/badge/Uses-Socket.IO-purple?style=for-the-badge&logo=socket-dot-io" alt="Uses Socket.IO">
+  <img src="https://img.shields.io/badge/Uses-Web%20Speech%20API-purple?style=for-the-badge" alt="Uses Web Speech API">
   <img src="https://img.shields.io/badge/License-MIT-red?style=for-the-badge" alt="License: MIT">
 </p>
 
@@ -25,7 +25,7 @@
 
 - **Backend:** Flask, Python
 - **Frontend:** HTML, CSS, JavaScript
-- **Speech Recognition:** Google Cloud Speech-to-Text API
+- **Speech Recognition:** Web Speech API
 - **AI Model:** Google Generative AI (Gemini model)
 - **Real-Time Communication:** Flask-SocketIO
 - **Database:** MongoDB
@@ -39,8 +39,14 @@
 
 1. Clone the repository.
 2. Install the required dependencies using `pip install -r requirements.txt`.
-3. Set up Google Cloud Speech-to-Text API and configure authentication.
-4. Run the Flask development server with `flask run`.
+3. Set up MongoDB and configure the `MONGO_URL` environment variable in your `.env` file:
+   -`MONGO_URL="mongodb://localhost:27017/database"`
+4. Set the Flask `SECRET_KEY` and Google API key in your `.env` file:
+  - `SECRET_KEY="value"`
+  - `GOOGLE_API_KEY="value"`
+5. Run the Flask development server with:
+   -`flask run or pyhton app.py`
+
 
 ## 🤝 Contributing
 
@@ -53,3 +59,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 Questions or feedback? Reach out anytime! 📬
+
+
